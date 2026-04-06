@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hypothesis Testing: Z-test &amp; t-test</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;color:#222;font-size:15px}
+.navbar{background:#178888;color:#fff;padding:0 24px;display:flex;align-items:center;gap:0;height:54px;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.navbar h1{font-size:17px;font-weight:600;letter-spacing:-.2px;white-space:nowrap;margin-right:32px}
+.nav-tabs{display:flex;gap:2px;overflow-x:auto}
+.nav-tab{padding:8px 16px;font-size:13px;font-weight:500;border:none;background:transparent;color:rgba(255,255,255,0.75);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
+.nav-tab:hover{color:#fff;background:rgba(255,255,255,0.1)}
+.nav-tab.active{color:#fff;border-bottom-color:#fff}
+.container{max-width:1100px;margin:0 auto;padding:24px 16px}
+.panel{display:none}.panel.active{display:block}
+.grid2{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+.card{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.08);margin-bottom:16px}
+.card-header{font-size:13px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #eee}
+label{font-size:13px;color:#555;display:block;margin-bottom:5px;margin-top:10px;font-weight:500}
+label:first-child{margin-top:0}
+select,input[type=number],textarea{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:14px;background:#fff;color:#222;outline:none;font-family:inherit;transition:border .15s}
+select:focus,input[type=number]:focus,textarea:focus{border-color:#178888;box-shadow:0 0 0 3px rgba(23,136,136,0.12)}
+textarea{resize:vertical;font-family:'Courier New',monospace;font-size:13px;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.btn{width:100%;padding:10px;font-size:14px;font-weight:600;border:none;border-radius:8px;background:#178888;color:#fff;cursor:pointer;margin-top:14px;transition:background .15s;letter-spacing:.2px}
+.btn:hover{background:#0f6666}
+.btn:active{background:#0a5555}
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.metric{background:#f5f9f9;border-radius:8px;padding:12px;text-align:center;border:1px solid #e0eeee}
+.metric .val{font-size:22px;font-weight:700;color:#178888}
+.metric .lbl{font-size:11px;color:#888;margin-top:3px}
+.result-box{padding:14px 16px;border-radius:8px;border-left:4px solid;margin-bottom:14px;font-size:14px}
+.result-reject{background:#e6f1fb;border-color:#178888;color:#0c447c}
+.result-fail{background:#eaf3de;border-color:#3b6d11;color:#27500a}
+.step{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0f0f0}
+.step:last-child{border-bottom:none}
+.step-num{min-width:24px;height:24px;border-radius:50%;background:#178888;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-text{font-size:13.5px;line-height:1.65;color:#333}
+.step-text b{color:#178888}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.sum-card{background:#f5f9f9;border-radius:7px;padding:10px;text-align:center;border:1px solid #e0eeee}
+.sum-card .sv{font-size:16px;font-weight:700;color:#222}
+.sum-card .sl{font-size:11px;color:#888;margin-top:2px}
+.radio-group{display:flex;gap:20px;margin:6px 0}
+.radio-group label{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#333;margin:0;font-weight:400}
+.radio-group input[type=radio]{accent-color:#178888;width:15px;height:15px;cursor:pointer}
+.helptext{font-size:12px;color:#888;margin-top:5px;line-height:1.5}
+hr{border:none;border-top:1px solid #eee;margin:14px 0}
+.hidden{display:none}
+table{width:100%;border-collapse:collapse;font-size:13px}
+table th{background:#f5f9f9;padding:8px 10px;text-align:left;font-weight:600;color:#555;border-bottom:2px solid #ddd}
+table td{padding:7px 10px;border-bottom:1px solid #f0f0f0}
+table tfoot td{background:#f5f9f9;font-weight:600}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;margin:2px 3px 2px 0}
+.badge-blue{background:#e6f1fb;color:#185fa5}
+.badge-amber{background:#faeeda;color:#854f0b}
+.badge-green{background:#eaf3de;color:#3b6d11}
+.formula-box{font-family:'Courier New',monospace;font-size:13px;background:#f5f9f9;padding:8px 12px;border-radius:6px;color:#333;margin:5px 0;border-left:3px solid #178888}
+.info-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-row .il{color:#666}
+.info-row .iv{font-family:'Courier New',monospace;font-weight:600;font-size:12px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.metric-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <h1>Hypothesis Testing</h1>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('os')">One-sample Z / t</button>
+    <button class="nav-tab" onclick="showTab('ts')">Two-sample t-test</button>
+    <button class="nav-tab" onclick="showTab('zs')">Two-sample Z-test</button>
+    <button class="nav-tab" onclick="showTab('pt')">Paired t-test</button>
+    <button class="nav-tab" onclick="showTab('guide')">When to use?</button>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ══ ONE-SAMPLE ═══════════════════════════════════════════ -->
+<div id="panel-os" class="panel active">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-header">Test parameters</div>
+        <label>Test type</label>
+        <select id="os-type">
+          <option value="z">Z-test (σ known, or n ≥ 30)</option>
+          <option value="t">t-test (σ unknown, n &lt; 30)</option>
+        </select>
+        <div class="helptext">Z-test → standard normal distribution &nbsp;|&nbsp; t-test → t-distribution (df = n−1)</div>
+        <hr>
+        <label>Input mode</label>
+        <div class="radio-group">
+          <label><input type="radio" name="os-mode" value="raw" checked onchange="osToggleMode()"> Enter raw data</label>
+          <label><input type="radio" name="os-mode" value="summary" onchange="osToggleMode()"> Summary statistics</label>
+        </div>
+        <hr>
+        <!-- Raw data -->
+        <div id="os-raw-panel">
+          <label>Raw data — comma or newline separated</label>
+          <textarea id="os-rawdata" rows="5">48, 55, 51, 60, 53, 49, 57, 52, 58, 50, 54, 47, 61, 56, 53, 59, 52, 48, 55, 50, 57, 53, 51, 54, 56, 49, 58, 52, 55, 53, 60, 54, 57, 51, 56</textarea>
+          <label>Hypothesized mean (μ₀)</label>
+          <input type="number" id="os-mu-raw" value="50" step="0.1">
+          <div id="os-sigma-panel">
+            <label>Known population σ (Z-test only — leave blank to use sample s)</label>
+            <input type="number" id="os-sigma-known" placeholder="leave blank" step="0.1" min="0.001">
+          </div>
+        </div>
+        <!-- Summary stats -->
+        <div id="os-sum-panel" class="hidden">
+          <div class="row2">
+            <div><label>Sample mean (x̄)</label><input type="number" id="os-xbar" value="52.3" step="0.1"></div>
+            <div><label>Hypothesized mean (μ₀)</label><input type="number" id="os-mu" value="50" step="0.1"></div>
+          </div>
+          <div class="row2">
+            <div><label>Std deviation (s or σ)</label><input type="number" id="os-sd" value="8.5" step="0.1" min="0.001"></div>
+            <div><label>Sample size (n)</label><input type="number" id="os-n" value="35" step="1" min="2"></div>
+          </div>
+        </div>
+        <hr>
+        <div class="row2">
+          <div>
+            <label>Significance level (α)</label>
+            <select id="os-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option><option value="0.10">0.10</option></select>
+          </div>
+          <div>
+            <label>Alternative hypothesis</label>
+            <select id="os-tail"><option value="two">Two-tailed (≠)</option><option value="right">Right-tailed (&gt;)</option><option value="left">Left-tailed (&lt;)</option></select>
+          </div>
+        </div>
+        <button class="btn" onclick="calcOS()">Calculate</button>
+      </div>
+    </div>
+    <div>
+      <div id="os-summary-card" class="card hidden">
+        <div class="card-header">Data summary</div>
+        <div class="summary-grid" id="os-summary-grid"></div>
+      </div>
+      <div id="os-results" class="hidden">
+        <div class="card">
+          <div class="card-header">Results</div>
+          <div class="metric-grid">
+            <div class="metric"><div class="val" id="os-stat-val">—</div><div class="lbl">test statistic</div></div>
+            <div class="metric"><div class="val" id="os-cv-val">—</div><div class="lbl">critical value</div></div>
+            <div class="metric"><div class="val" id="os-p-val">—</div><div class="lbl">p-value</div></div>
+          </div>
+          <div id="os-decision-box"></div>
+          <div id="os-chart" style="margin-top:14px;width:100%"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Step-by-step solution</div>
+          <div id="os-steps"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TWO-SAMPLE T ══════════════════════════════════════════ -->
+<div id="panel-ts" class="panel">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-header">Group 1</div>
+        <div class="row2">
+          <div><label>Mean (x̄₁)</label><input type="number" id="ts-x1" value="45.2" step="0.1"></div>
+          <div><label>Std dev (s₁)</label><input type="number" id="ts-s1" value="6.3" step="0.1" min="0.001"></div>
+        </div>
+        <label>Sample size (n₁)</label><input type="number" id="ts-n1" value="25" step="1" min="2">
+      </div>
+      <div class="card">
+        <div class="card-header">Group 2</div>
+        <div class="row2">
+          <div><label>Mean (x̄₂)</label><input type="number" id="ts-x2" value="41.8" step="0.1"></div>
+          <div><label>Std dev (s₂)</label><input type="number" id="ts-s2" value="7.1" step="0.1" min="0.001"></div>
+        </div>
+        <label>Sample size (n₂)</label><input type="number" id="ts-n2" value="22" step="1" min="2">
+      </div>
+      <div class="card">
+        <div class="card-header">Test settings</div>
+        <div class="row2">
+          <div><label>α level</label><select id="ts-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option><option value="0.10">0.10</option></select></div>
+          <div><label>Alternative</label><select id="ts-tail"><option value="two">Two-tailed (≠)</option><option value="right">Right-tailed (&gt;)</option><option value="left">Left-tailed (&lt;)</option></select></div>
+        </div>
+        <label>Variance assumption</label>
+        <select id="ts-var"><option value="pooled">Equal variances (pooled)</option><option value="welch">Unequal variances (Welch)</option></select>
+        <button class="btn" onclick="calcTS()">Calculate</button>
+      </div>
+    </div>
+    <div id="ts-results" class="hidden">
+      <div class="card">
+        <div class="card-header">Results</div>
+        <div class="metric-grid">
+          <div class="metric"><div class="val" id="ts-stat-val">—</div><div class="lbl">t-statistic</div></div>
+          <div class="metric"><div class="val" id="ts-df-val">—</div><div class="lbl">degrees of freedom</div></div>
+          <div class="metric"><div class="val" id="ts-p-val">—</div><div class="lbl">p-value</div></div>
+        </div>
+        <div id="ts-decision-box"></div>
+        <div id="ts-chart" style="margin-top:14px;width:100%"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Step-by-step solution</div>
+        <div id="ts-steps"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TWO-SAMPLE Z ══════════════════════════════════════════ -->
+<div id="panel-zs" class="panel">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-header">Group 1</div>
+        <div class="row2">
+          <div><label>Mean (x̄₁)</label><input type="number" id="zs-x1" value="52.4" step="0.1"></div>
+          <div><label>Pop. std dev (σ₁)</label><input type="number" id="zs-s1" value="7.2" step="0.1" min="0.001"></div>
+        </div>
+        <label>Sample size (n₁)</label><input type="number" id="zs-n1" value="40" step="1" min="1">
+      </div>
+      <div class="card">
+        <div class="card-header">Group 2</div>
+        <div class="row2">
+          <div><label>Mean (x̄₂)</label><input type="number" id="zs-x2" value="49.1" step="0.1"></div>
+          <div><label>Pop. std dev (σ₂)</label><input type="number" id="zs-s2" value="6.8" step="0.1" min="0.001"></div>
+        </div>
+        <label>Sample size (n₂)</label><input type="number" id="zs-n2" value="35" step="1" min="1">
+      </div>
+      <div class="card">
+        <div class="card-header">Test settings</div>
+        <div class="row2">
+          <div><label>α level</label><select id="zs-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option><option value="0.10">0.10</option></select></div>
+          <div><label>Alternative</label><select id="zs-tail"><option value="two">Two-tailed (≠)</option><option value="right">Right-tailed (&gt;)</option><option value="left">Left-tailed (&lt;)</option></select></div>
+        </div>
+        <div class="helptext" style="margin-top:8px">Use when both population standard deviations (σ₁, σ₂) are known.</div>
+        <button class="btn" onclick="calcZS()">Calculate</button>
+      </div>
+    </div>
+    <div id="zs-results" class="hidden">
+      <div class="card">
+        <div class="card-header">Results</div>
+        <div class="metric-grid">
+          <div class="metric"><div class="val" id="zs-stat-val">—</div><div class="lbl">Z-statistic</div></div>
+          <div class="metric"><div class="val" id="zs-cv-val">—</div><div class="lbl">critical value</div></div>
+          <div class="metric"><div class="val" id="zs-p-val">—</div><div class="lbl">p-value</div></div>
+        </div>
+        <div id="zs-decision-box"></div>
+        <div id="zs-chart" style="margin-top:14px;width:100%"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Step-by-step solution</div>
+        <div id="zs-steps"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAIRED T ══════════════════════════════════════════════ -->
+<div id="panel-pt" class="panel">
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-header">Enter paired data</div>
+        <label>Group 1 (before) — comma or newline separated</label>
+        <textarea id="pt-g1" rows="4">65, 72, 68, 74, 70, 63, 69, 71, 67, 75</textarea>
+        <label>Group 2 (after) — comma or newline separated</label>
+        <textarea id="pt-g2" rows="4">60, 68, 65, 71, 66, 59, 64, 67, 63, 70</textarea>
+        <div class="row2" style="margin-top:10px">
+          <div><label>α level</label><select id="pt-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option><option value="0.10">0.10</option></select></div>
+          <div><label>Alternative</label><select id="pt-tail"><option value="two">Two-tailed (≠)</option><option value="right">Right-tailed (&gt;)</option><option value="left">Left-tailed (&lt;)</option></select></div>
+        </div>
+        <button class="btn" onclick="calcPT()">Calculate</button>
+      </div>
+    </div>
+    <div id="pt-results" class="hidden">
+      <div class="card" id="pt-diff-card">
+        <div class="card-header">Difference summary</div>
+        <div id="pt-diff-table"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Results</div>
+        <div class="metric-grid">
+          <div class="metric"><div class="val" id="pt-stat-val">—</div><div class="lbl">t-statistic</div></div>
+          <div class="metric"><div class="val" id="pt-df-val">—</div><div class="lbl">degrees of freedom</div></div>
+          <div class="metric"><div class="val" id="pt-p-val">—</div><div class="lbl">p-value</div></div>
+        </div>
+        <div id="pt-decision-box"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Step-by-step solution</div>
+        <div id="pt-steps"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GUIDE ═════════════════════════════════════════════════ -->
+<div id="panel-guide" class="panel">
+  <div class="grid2" style="grid-template-columns:1fr 1fr">
+    <div>
+      <div class="card">
+        <div class="card-header">Decision guide</div>
+        <p style="font-weight:600;margin-bottom:6px">Z-test (one-sample)</p>
+        <span class="badge badge-blue">σ known</span><span class="badge badge-blue">n ≥ 30</span>
+        <p class="helptext" style="margin-top:6px;margin-bottom:14px">Uses standard normal distribution. Critical value: ±1.96 at α=0.05.</p>
+        <p style="font-weight:600;margin-bottom:6px">One-sample t-test</p>
+        <span class="badge badge-amber">σ unknown</span><span class="badge badge-amber">n &lt; 30</span>
+        <p class="helptext" style="margin-top:6px;margin-bottom:14px">Uses t-distribution, df = n−1. Heavier tails than Z.</p>
+        <p style="font-weight:600;margin-bottom:6px">Two-sample Z-test</p>
+        <span class="badge badge-blue">Both σ₁, σ₂ known</span>
+        <p class="helptext" style="margin-top:6px;margin-bottom:14px">Compares two independent group means when population SDs are known.</p>
+        <p style="font-weight:600;margin-bottom:6px">Two-sample t-test</p>
+        <span class="badge badge-green">Two independent groups</span>
+        <p class="helptext" style="margin-top:6px;margin-bottom:14px">Pooled: assume σ₁=σ₂. Welch: when variances differ (use Levene's test).</p>
+        <p style="font-weight:600;margin-bottom:6px">Paired t-test</p>
+        <span class="badge badge-blue">Before/after</span><span class="badge badge-blue">Matched pairs</span>
+        <p class="helptext" style="margin-top:6px">Removes between-subject variability. More powerful than two-sample t when applicable.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-header">Key formulas</div>
+        <p style="font-size:13px;color:#555;margin-bottom:6px">One-sample Z-test</p>
+        <div class="formula-box">Z = (x̄ − μ₀) / (σ / √n)</div>
+        <p style="font-size:13px;color:#555;margin:10px 0 6px">One-sample t-test</p>
+        <div class="formula-box">t = (x̄ − μ₀) / (s / √n) &nbsp;&nbsp; df = n − 1</div>
+        <p style="font-size:13px;color:#555;margin:10px 0 6px">Two-sample Z-test</p>
+        <div class="formula-box">Z = (x̄₁ − x̄₂) / √(σ₁²/n₁ + σ₂²/n₂)</div>
+        <p style="font-size:13px;color:#555;margin:10px 0 6px">Two-sample t (pooled)</p>
+        <div class="formula-box">t = (x̄₁ − x̄₂) / (sp × √(1/n₁ + 1/n₂)) &nbsp; df = n₁+n₂−2</div>
+        <p style="font-size:13px;color:#555;margin:10px 0 6px">Paired t-test</p>
+        <div class="formula-box">t = d̄ / (sd / √n) &nbsp;&nbsp; df = n − 1</div>
+      </div>
+      <div class="card">
+        <div class="card-header">Critical values (two-tailed)</div>
+        <div class="info-row"><span class="il">Z, α=0.10</span><span class="iv">±1.645</span></div>
+        <div class="info-row"><span class="il">Z, α=0.05</span><span class="iv">±1.960</span></div>
+        <div class="info-row"><span class="il">Z, α=0.01</span><span class="iv">±2.576</span></div>
+        <div class="info-row"><span class="il">t (df=10), α=0.05</span><span class="iv">±2.228</span></div>
+        <div class="info-row"><span class="il">t (df=20), α=0.05</span><span class="iv">±2.086</span></div>
+        <div class="info-row"><span class="il">t (df=30), α=0.05</span><span class="iv">±2.042</span></div>
+        <div class="info-row"><span class="il">t (df=∞), α=0.05</span><span class="iv">±1.960</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ── Tab switching ────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function osToggleMode() {
+  const raw = document.querySelector('input[name="os-mode"]:checked').value === 'raw';
+  document.getElementById('os-raw-panel').classList.toggle('hidden', !raw);
+  document.getElementById('os-sum-panel').classList.toggle('hidden', raw);
+}
+
+document.getElementById('os-type').addEventListener('change', function() {
+  const isZ = this.value === 'z';
+  document.getElementById('os-sigma-panel').classList.toggle('hidden', !isZ);
+});
+
+// ── Statistics functions ─────────────────────────────────────
+function normalPDF(x) { return Math.exp(-0.5*x*x) / Math.sqrt(2*Math.PI); }
+
+function normalCDF(x) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(x));
+  const poly = t*(0.319381530 + t*(-0.356563782 + t*(1.781477937 + t*(-1.821255978 + t*1.330274429))));
+  const c = 1 - normalPDF(x) * poly;
+  return x >= 0 ? c : 1 - c;
+}
+
+function tPDF(x, df) {
+  const lg = (n) => {
+    const p = [676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,
+               12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+    if (n < 0.5) return Math.log(Math.PI) - Math.log(Math.sin(Math.PI*n)) - lg(1-n);
+    n -= 1; let x2 = 0.99999999999980993;
+    for (let i=0;i<8;i++) x2 += p[i]/(n+i+1);
+    const t2 = n+8-0.5;
+    return 0.5*Math.log(2*Math.PI) + (n+0.5)*Math.log(t2) - t2 + Math.log(x2);
+  };
+  return Math.exp(lg((df+1)/2) - 0.5*Math.log(df*Math.PI) - lg(df/2) - (df+1)/2*Math.log(1+x*x/df));
+}
+
+function tCDF(t, df) {
+  // Numerical integration of t-distribution CDF
+  const steps = 1000;
+  const upper = Math.abs(t);
+  let area = 0;
+  for (let i = 0; i < steps; i++) {
+    const x1 = upper * i / steps;
+    const x2 = upper * (i+1) / steps;
+    area += (tPDF(x1, df) + tPDF(x2, df)) / 2 * (x2 - x1);
+  }
+  const halfArea = 0.5 + area;
+  return t >= 0 ? halfArea : 1 - halfArea;
+}
+
+function pValue(stat, df, tail, isZ) {
+  const cdf = isZ ? normalCDF : (x => tCDF(x, df));
+  if (tail === 'two')   return 2 * (1 - cdf(Math.abs(stat)));
+  if (tail === 'right') return 1 - cdf(stat);
+  return cdf(stat);
+}
+
+function criticalValue(alpha, df, tail, isZ) {
+  const p = tail === 'two' ? 1 - alpha/2 : 1 - alpha;
+  if (isZ) return invNorm(p);
+  return invT(p, df);
+}
+
+function invNorm(p) {
+  let lo = -10, hi = 10;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    normalCDF(mid) < p ? lo = mid : hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+function invT(p, df) {
+  let lo = 0, hi = 50;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    tCDF(mid, df) < p ? lo = mid : hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+function parseNums(s) {
+  return s.split(/[\s,\n]+/).map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+}
+
+function fmt(n, d=4) { return parseFloat(n.toFixed(d)); }
+function fmt3(n) { return parseFloat(n.toFixed(3)); }
+
+// ── UI helpers ───────────────────────────────────────────────
+function decisionBox(reject, pval, alpha, stat, cv, tail, label) {
+  const cls   = reject ? 'result-reject' : 'result-fail';
+  const icon  = reject ? '✗' : '✓';
+  const dec   = reject ? 'Reject H₀' : 'Fail to reject H₀';
+  const sig   = reject ? 'Statistically significant' : 'Not statistically significant';
+  const sym   = reject ? '<' : '≥';
+  return `<div class="result-box ${cls}">
+    <strong style="font-size:15px">${icon} &nbsp;${dec}</strong><br>
+    <small>p = ${fmt(pval)} ${sym} α = ${alpha} &nbsp;|&nbsp; ${sig} at α = ${alpha}</small>
+  </div>`;
+}
+
+function makeSteps(steps) {
+  return steps.map((s, i) => `
+    <div class="step">
+      <div class="step-num">${i+1}</div>
+      <div class="step-text">${s}</div>
+    </div>`).join('');
+}
+
+// ── SVG Chart ────────────────────────────────────────────────
+function drawChart(divId, stat, cv, df, isZ, tail) {
+  const div = document.getElementById(divId);
+  const W = 500, H = 180;
+  const PAD = {l:10, r:10, t:32, b:18};
+  const pw = W - PAD.l - PAD.r;
+  const ph = H - PAD.t - PAD.b;
+  const xMin = -4.2, xMax = 4.2;
+
+  // Generate curve points
+  const N = 300;
+  const pts = [];
+  for (let i = 0; i <= N; i++) {
+    const x = xMin + (xMax - xMin) * i / N;
+    const y = isZ ? normalPDF(x) : tPDF(x, df);
+    pts.push([x, y]);
+  }
+  const maxY = Math.max(...pts.map(p => p[1])) * 1.1;
+  const px = x => PAD.l + (x - xMin) / (xMax - xMin) * pw;
+  const py = y => PAD.t + (1 - y / maxY) * ph;
+  const baseline = PAD.t + ph;
+
+  // Build SVG path for the curve
+  const curvePath = pts.map(([x,y], i) => (i===0?'M':'L') + px(x).toFixed(1)+','+py(y).toFixed(1)).join(' ');
+
+  // Rejection region polygon
+  const isRej = x => tail==='two' ? Math.abs(x)>=cv : tail==='right' ? x>=cv : x<=-cv;
+  let rejPaths = '';
+  let segPts = null;
+  for (let i = 0; i <= pts.length; i++) {
+    const inR = i < pts.length && isRej(pts[i][0]);
+    if (inR && !segPts) segPts = [];
+    if (segPts && i < pts.length) segPts.push(pts[i]);
+    if ((!inR || i === pts.length) && segPts && segPts.length > 0) {
+      const first = segPts[0], last = segPts[segPts.length-1];
+      const polyPts = [
+        [px(first[0]), baseline],
+        ...segPts.map(([x,y]) => [px(x), py(y)]),
+        [px(last[0]), baseline]
+      ].map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+      rejPaths += `<polygon points="${polyPts}" fill="rgba(23,136,136,0.22)" />`;
+      segPts = null;
+    }
+  }
+
+  // CV lines
+  const cvLines = tail==='two' ? [-cv, cv] : tail==='right' ? [cv] : [-cv];
+  const cvSVG = cvLines.map(v =>
+    `<line x1="${px(v).toFixed(1)}" y1="${baseline}" x2="${px(v).toFixed(1)}" y2="${PAD.t}" stroke="#178888" stroke-width="1.8" stroke-dasharray="5,4"/>`
+  ).join('');
+
+  // Stat line
+  const statSVG = `<line x1="${px(stat).toFixed(1)}" y1="${baseline}" x2="${px(stat).toFixed(1)}" y2="${PAD.t}" stroke="#c03030" stroke-width="2.5"/>`;
+
+  // Labels
+  const statLbl = (isZ?'Z':'t') + ' = ' + fmt3(stat);
+  const statTx = px(stat), statAnchor = stat >= 0 ? 'end' : 'start', statDx = stat >= 0 ? -6 : 6;
+  const cvLbl = tail==='two' ? '±'+fmt3(cv) : 'cv='+fmt3(cvLines[0]);
+  const cvTx = px(cvLines[cvLines.length-1]);
+  const distName = isZ ? 'Standard Normal Distribution' : 't-Distribution (df = ' + df + ')';
+
+  div.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fafafa;border-radius:8px;border:1px solid #eee">
+    ${rejPaths}
+    <path d="${curvePath}" fill="none" stroke="#444" stroke-width="2"/>
+    ${cvSVG}
+    ${statSVG}
+    <text x="${(statTx+statDx).toFixed(1)}" y="${PAD.t+14}" fill="#c03030" font-size="12" font-weight="bold" text-anchor="${statAnchor}" font-family="Segoe UI,sans-serif">${statLbl}</text>
+    <text x="${(cvTx+6).toFixed(1)}" y="${py(maxY*0.42).toFixed(1)}" fill="#178888" font-size="11" text-anchor="start" font-family="Segoe UI,sans-serif">${cvLbl}</text>
+    <text x="${W/2}" y="${H-4}" fill="#aaa" font-size="11" text-anchor="middle" font-family="Segoe UI,sans-serif">${distName}</text>
+  </svg>`;
+}
+
+// ── ONE-SAMPLE ───────────────────────────────────────────────
+function calcOS() {
+  const isZ    = document.getElementById('os-type').value === 'z';
+  const mode   = document.querySelector('input[name="os-mode"]:checked').value;
+  const alpha  = parseFloat(document.getElementById('os-alpha').value);
+  const tail   = document.getElementById('os-tail').value;
+  let xbar, mu, sd, n, sdLabel;
+
+  if (mode === 'raw') {
+    const raw = parseNums(document.getElementById('os-rawdata').value);
+    if (raw.length < 2) return alert('Please enter at least 2 data values.');
+    n    = raw.length;
+    xbar = raw.reduce((a,b)=>a+b,0) / n;
+    const variance = raw.reduce((a,b)=>a+(b-xbar)*(b-xbar),0)/(n-1);
+    sd   = Math.sqrt(variance);
+    mu   = parseFloat(document.getElementById('os-mu-raw').value);
+    const sigmaKnown = parseFloat(document.getElementById('os-sigma-known').value);
+    if (isZ && !isNaN(sigmaKnown) && sigmaKnown > 0) {
+      sd = sigmaKnown; sdLabel = `σ (known) = ${fmt(sd)}`;
+    } else { sdLabel = `s (from data) = ${fmt(sd)}`; }
+    // Show data summary
+    const sorted = [...raw].sort((a,b)=>a-b);
+    const med = n%2===0 ? (sorted[n/2-1]+sorted[n/2])/2 : sorted[Math.floor(n/2)];
+    const q1  = sorted[Math.floor(n*0.25)];
+    const q3  = sorted[Math.floor(n*0.75)];
+    document.getElementById('os-summary-grid').innerHTML = [
+      ['n', n], ['mean', fmt(xbar,4)], ['std dev', fmt(sd,4)], ['median', fmt(med,4)],
+      ['min', fmt(Math.min(...raw),3)], ['max', fmt(Math.max(...raw),3)], ['Q1', fmt(q1,3)], ['Q3', fmt(q3,3)]
+    ].map(([l,v])=>`<div class="sum-card"><div class="sv">${v}</div><div class="sl">${l}</div></div>`).join('');
+    document.getElementById('os-summary-card').classList.remove('hidden');
+  } else {
+    xbar = parseFloat(document.getElementById('os-xbar').value);
+    mu   = parseFloat(document.getElementById('os-mu').value);
+    sd   = parseFloat(document.getElementById('os-sd').value);
+    n    = parseFloat(document.getElementById('os-n').value);
+    sdLabel = `s = ${fmt(sd)}`;
+    document.getElementById('os-summary-card').classList.add('hidden');
+    if ([xbar,mu,sd,n].some(isNaN) || sd<=0 || n<2) return alert('Please check your inputs.');
+  }
+
+  const se   = sd / Math.sqrt(n);
+  const stat = (xbar - mu) / se;
+  const df   = Math.floor(n - 1);
+  const cv   = criticalValue(alpha, df, tail, isZ);
+  const pval = pValue(stat, df, tail, isZ);
+  const reject = pval < alpha;
+  const label = isZ ? 'Z' : 't';
+  const distName = isZ ? 'Standard Normal Distribution' : `t-Distribution (df = ${df})`;
+
+  document.getElementById('os-stat-val').textContent = fmt3(stat);
+  document.getElementById('os-cv-val').textContent   = (tail==='two'?'±':'') + fmt3(cv);
+  document.getElementById('os-p-val').textContent    = fmt(pval);
+  document.getElementById('os-decision-box').innerHTML = decisionBox(reject, pval, alpha, stat, cv, tail, label);
+  document.getElementById('os-results').classList.remove('hidden');
+
+  const dataStep = mode === 'raw'
+    ? `Raw data entered (n = ${n}). Computed: x̄ = <b>${fmt(xbar,4)}</b>, ${sdLabel}`
+    : `Summary statistics: x̄ = ${fmt(xbar,4)}, ${sdLabel}, n = ${n}`;
+
+  document.getElementById('os-steps').innerHTML = makeSteps([
+    `State hypotheses: H₀: μ = ${mu},   H₁: μ ${{two:'≠',right:'>',left:'<'}[tail]} ${mu}`,
+    dataStep,
+    `Standard error: SE = ${label==='Z'?'σ':'s'}/√n = ${fmt(sd)} / √${n} = <b>${fmt(se)}</b>`,
+    `Test statistic: ${label} = (x̄ − μ₀)/SE = (${fmt(xbar,4)} − ${mu}) / ${fmt(se)} = <b>${fmt(stat)}</b>`,
+    isZ ? 'Degrees of freedom: N/A — Z-test uses the standard normal distribution'
+        : `Degrees of freedom: df = n − 1 = ${n} − 1 = <b>${df}</b>`,
+    `Critical value (α = ${alpha}, ${tail}-tailed): ${label} = ${tail==='two'?'±':''}${fmt(cv)}`,
+    `p-value = <b>${fmt(pval)}</b>  ${reject?'<':'≥'} α = ${alpha} → <b>${reject?'Reject H₀':'Fail to reject H₀'}</b>`
+  ]);
+
+  setTimeout(() => drawChart('os-chart', stat, cv, df, isZ, tail), 50);
+}
+
+// ── TWO-SAMPLE T ─────────────────────────────────────────────
+function calcTS() {
+  const x1   = parseFloat(document.getElementById('ts-x1').value);
+  const s1   = parseFloat(document.getElementById('ts-s1').value);
+  const n1   = parseFloat(document.getElementById('ts-n1').value);
+  const x2   = parseFloat(document.getElementById('ts-x2').value);
+  const s2   = parseFloat(document.getElementById('ts-s2').value);
+  const n2   = parseFloat(document.getElementById('ts-n2').value);
+  const alpha = parseFloat(document.getElementById('ts-alpha').value);
+  const tail  = document.getElementById('ts-tail').value;
+  const vtype = document.getElementById('ts-var').value;
+  if ([x1,s1,n1,x2,s2,n2].some(isNaN)||s1<=0||s2<=0||n1<2||n2<2) return alert('Check your inputs.');
+
+  let se, df, seLabel;
+  if (vtype === 'pooled') {
+    const sp2 = ((n1-1)*s1*s1 + (n2-1)*s2*s2) / (n1+n2-2);
+    const sp  = Math.sqrt(sp2);
+    se  = sp * Math.sqrt(1/n1 + 1/n2);
+    df  = Math.floor(n1 + n2 - 2);
+    seLabel = `Pooled: sp = ${fmt(sp)}, SE = sp × √(1/n₁+1/n₂) = <b>${fmt(se)}</b>`;
+  } else {
+    se  = Math.sqrt(s1*s1/n1 + s2*s2/n2);
+    const num   = Math.pow(s1*s1/n1 + s2*s2/n2, 2);
+    const denom = Math.pow(s1*s1/n1,2)/(n1-1) + Math.pow(s2*s2/n2,2)/(n2-1);
+    df  = Math.floor(num / denom);
+    seLabel = `Welch: SE = √(s₁²/n₁+s₂²/n₂) = <b>${fmt(se)}</b>, df (Welch–Satterthwaite) = <b>${df}</b>`;
+  }
+
+  const stat   = (x1 - x2) / se;
+  const cv     = criticalValue(alpha, df, tail, false);
+  const pval   = pValue(stat, df, tail, false);
+  const reject = pval < alpha;
+
+  document.getElementById('ts-stat-val').textContent = fmt3(stat);
+  document.getElementById('ts-df-val').textContent   = df;
+  document.getElementById('ts-p-val').textContent    = fmt(pval);
+  document.getElementById('ts-decision-box').innerHTML = decisionBox(reject, pval, alpha, stat, cv, tail, 't');
+  document.getElementById('ts-results').classList.remove('hidden');
+
+  document.getElementById('ts-steps').innerHTML = makeSteps([
+    `Hypotheses: H₀: μ₁ = μ₂   H₁: μ₁ ${{two:'≠',right:'>',left:'<'}[tail]} μ₂`,
+    `Method: ${vtype==='pooled'?'Pooled t-test (equal variances assumed)':'Welch t-test (unequal variances)'}`,
+    seLabel,
+    `t = (x̄₁ − x̄₂)/SE = (${x1} − ${x2}) / ${fmt(se)} = <b>${fmt(stat)}</b>`,
+    `Critical value: t(α=${alpha}, df=${df}) = ${tail==='two'?'±':''}${fmt(cv)}`,
+    `p-value = <b>${fmt(pval)}</b>  ${reject?'<':'≥'} α = ${alpha} → <b>${reject?'Reject H₀':'Fail to reject H₀'}</b>`
+  ]);
+
+  setTimeout(() => drawChart('ts-chart', stat, cv, df, false, tail), 50);
+}
+
+// ── TWO-SAMPLE Z ─────────────────────────────────────────────
+function calcZS() {
+  const x1     = parseFloat(document.getElementById('zs-x1').value);
+  const sigma1 = parseFloat(document.getElementById('zs-s1').value);
+  const n1     = parseFloat(document.getElementById('zs-n1').value);
+  const x2     = parseFloat(document.getElementById('zs-x2').value);
+  const sigma2 = parseFloat(document.getElementById('zs-s2').value);
+  const n2     = parseFloat(document.getElementById('zs-n2').value);
+  const alpha  = parseFloat(document.getElementById('zs-alpha').value);
+  const tail   = document.getElementById('zs-tail').value;
+  if ([x1,sigma1,n1,x2,sigma2,n2].some(isNaN)||sigma1<=0||sigma2<=0||n1<1||n2<1) return alert('Check your inputs.');
+
+  const se   = Math.sqrt(sigma1*sigma1/n1 + sigma2*sigma2/n2);
+  const stat = (x1 - x2) / se;
+  const cv   = criticalValue(alpha, null, tail, true);
+  const pval = pValue(stat, null, tail, true);
+  const reject = pval < alpha;
+
+  document.getElementById('zs-stat-val').textContent = fmt3(stat);
+  document.getElementById('zs-cv-val').textContent   = (tail==='two'?'±':'') + fmt3(cv);
+  document.getElementById('zs-p-val').textContent    = fmt(pval);
+  document.getElementById('zs-decision-box').innerHTML = decisionBox(reject, pval, alpha, stat, cv, tail, 'Z');
+  document.getElementById('zs-results').classList.remove('hidden');
+
+  document.getElementById('zs-steps').innerHTML = makeSteps([
+    `Hypotheses: H₀: μ₁ = μ₂   H₁: μ₁ ${{two:'≠',right:'>',left:'<'}[tail]} μ₂`,
+    `Both population σ are known: σ₁ = ${sigma1}, σ₂ = ${sigma2} → use Z-test`,
+    `SE = √(σ₁²/n₁ + σ₂²/n₂) = √(${sigma1}²/${n1} + ${sigma2}²/${n2}) = <b>${fmt(se)}</b>`,
+    `Z = (x̄₁ − x̄₂)/SE = (${x1} − ${x2}) / ${fmt(se)} = <b>${fmt(stat)}</b>`,
+    `Critical value (α=${alpha}, ${tail}-tailed): Z = ${tail==='two'?'±':''}${fmt(cv)}`,
+    `p-value = <b>${fmt(pval)}</b>  ${reject?'<':'≥'} α = ${alpha} → <b>${reject?'Reject H₀':'Fail to reject H₀'}</b>`
+  ]);
+
+  setTimeout(() => drawChart('zs-chart', stat, cv, null, true, tail), 50);
+}
+
+// ── PAIRED T ─────────────────────────────────────────────────
+function calcPT() {
+  const g1    = parseNums(document.getElementById('pt-g1').value);
+  const g2    = parseNums(document.getElementById('pt-g2').value);
+  const alpha = parseFloat(document.getElementById('pt-alpha').value);
+  const tail  = document.getElementById('pt-tail').value;
+  if (g1.length !== g2.length) return alert('Groups must have equal number of values.');
+  if (g1.length < 2) return alert('Need at least 2 pairs.');
+
+  const n     = g1.length;
+  const diffs = g1.map((v,i) => v - g2[i]);
+  const dbar  = diffs.reduce((a,b)=>a+b,0) / n;
+  const sd_d  = Math.sqrt(diffs.reduce((a,v)=>a+(v-dbar)*(v-dbar),0)/(n-1));
+  const se    = sd_d / Math.sqrt(n);
+  const stat  = dbar / se;
+  const df    = n - 1;
+  const cv    = criticalValue(alpha, df, tail, false);
+  const pval  = pValue(stat, df, tail, false);
+  const reject = pval < alpha;
+
+  // Difference table
+  const showN = Math.min(10, n);
+  let rows = '';
+  for (let i=0; i<showN; i++) rows += `<tr><td>Pair ${i+1}</td><td>${g1[i]}</td><td>${g2[i]}</td><td><b>${fmt(diffs[i],3)}</b></td></tr>`;
+  if (n > showN) rows += `<tr><td colspan="4" style="color:#888;font-style:italic">... ${n-showN} more pairs</td></tr>`;
+  document.getElementById('pt-diff-table').innerHTML = `
+    <table>
+      <thead><tr><th>Pair</th><th>Before</th><th>After</th><th>d = B−A</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr><td colspan="3">Mean difference (d̄)</td><td><b>${fmt(dbar,4)}</b></td></tr>
+        <tr><td colspan="3">Std dev of differences (sd)</td><td><b>${fmt(sd_d,4)}</b></td></tr>
+      </tfoot>
+    </table>`;
+
+  document.getElementById('pt-stat-val').textContent = fmt3(stat);
+  document.getElementById('pt-df-val').textContent   = df;
+  document.getElementById('pt-p-val').textContent    = fmt(pval);
+  document.getElementById('pt-decision-box').innerHTML = decisionBox(reject, pval, alpha, stat, cv, tail, 't');
+  document.getElementById('pt-results').classList.remove('hidden');
+
+  document.getElementById('pt-steps').innerHTML = makeSteps([
+    `Compute differences: dᵢ = before − after for each of ${n} pairs`,
+    `Mean difference: d̄ = Σdᵢ / n = <b>${fmt(dbar,4)}</b>`,
+    `Std dev of differences: sd = <b>${fmt(sd_d,4)}</b>`,
+    `Standard error: SE = sd / √n = ${fmt(sd_d,4)} / √${n} = <b>${fmt(se,4)}</b>`,
+    `t = d̄ / SE = ${fmt(dbar,4)} / ${fmt(se,4)} = <b>${fmt(stat)}</b>,   df = n−1 = <b>${df}</b>`,
+    `Critical value: t(α=${alpha}, df=${df}) = ${tail==='two'?'±':''}${fmt(cv)}`,
+    `p-value = <b>${fmt(pval)}</b>  ${reject?'<':'≥'} α = ${alpha} → <b>${reject?'Reject H₀ — significant difference':'Fail to reject H₀'}</b>`
+  ]);
+}
+</script>
+</body>
+</html>
