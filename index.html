@@ -75,7 +75,6 @@ table tfoot td{background:#f5f9f9;font-weight:600}
     <button class="nav-tab" onclick="showTab('ts')">Two-sample t-test</button>
     <button class="nav-tab" onclick="showTab('zs')">Two-sample Z-test</button>
     <button class="nav-tab" onclick="showTab('pt')">Paired t-test</button>
-    <button class="nav-tab" onclick="showTab('guide')">When to use?</button>
   </div>
 </div>
 
@@ -299,56 +298,6 @@ table tfoot td{background:#f5f9f9;font-weight:600}
   </div>
 </div>
 
-<!-- ══ GUIDE ═════════════════════════════════════════════════ -->
-<div id="panel-guide" class="panel">
-  <div class="grid2" style="grid-template-columns:1fr 1fr">
-    <div>
-      <div class="card">
-        <div class="card-header">Decision guide</div>
-        <p style="font-weight:600;margin-bottom:6px">Z-test (one-sample)</p>
-        <span class="badge badge-blue">σ known</span><span class="badge badge-blue">n ≥ 30</span>
-        <p class="helptext" style="margin-top:6px;margin-bottom:14px">Uses standard normal distribution. Critical value: ±1.96 at α=0.05.</p>
-        <p style="font-weight:600;margin-bottom:6px">One-sample t-test</p>
-        <span class="badge badge-amber">σ unknown</span><span class="badge badge-amber">n &lt; 30</span>
-        <p class="helptext" style="margin-top:6px;margin-bottom:14px">Uses t-distribution, df = n−1. Heavier tails than Z.</p>
-        <p style="font-weight:600;margin-bottom:6px">Two-sample Z-test</p>
-        <span class="badge badge-blue">Both σ₁, σ₂ known</span>
-        <p class="helptext" style="margin-top:6px;margin-bottom:14px">Compares two independent group means when population SDs are known.</p>
-        <p style="font-weight:600;margin-bottom:6px">Two-sample t-test</p>
-        <span class="badge badge-green">Two independent groups</span>
-        <p class="helptext" style="margin-top:6px;margin-bottom:14px">Pooled: assume σ₁=σ₂. Welch: when variances differ (use Levene's test).</p>
-        <p style="font-weight:600;margin-bottom:6px">Paired t-test</p>
-        <span class="badge badge-blue">Before/after</span><span class="badge badge-blue">Matched pairs</span>
-        <p class="helptext" style="margin-top:6px">Removes between-subject variability. More powerful than two-sample t when applicable.</p>
-      </div>
-    </div>
-    <div>
-      <div class="card">
-        <div class="card-header">Key formulas</div>
-        <p style="font-size:13px;color:#555;margin-bottom:6px">One-sample Z-test</p>
-        <div class="formula-box">Z = (x̄ − μ₀) / (σ / √n)</div>
-        <p style="font-size:13px;color:#555;margin:10px 0 6px">One-sample t-test</p>
-        <div class="formula-box">t = (x̄ − μ₀) / (s / √n) &nbsp;&nbsp; df = n − 1</div>
-        <p style="font-size:13px;color:#555;margin:10px 0 6px">Two-sample Z-test</p>
-        <div class="formula-box">Z = (x̄₁ − x̄₂) / √(σ₁²/n₁ + σ₂²/n₂)</div>
-        <p style="font-size:13px;color:#555;margin:10px 0 6px">Two-sample t (pooled)</p>
-        <div class="formula-box">t = (x̄₁ − x̄₂) / (sp × √(1/n₁ + 1/n₂)) &nbsp; df = n₁+n₂−2</div>
-        <p style="font-size:13px;color:#555;margin:10px 0 6px">Paired t-test</p>
-        <div class="formula-box">t = d̄ / (sd / √n) &nbsp;&nbsp; df = n − 1</div>
-      </div>
-      <div class="card">
-        <div class="card-header">Critical values (two-tailed)</div>
-        <div class="info-row"><span class="il">Z, α=0.10</span><span class="iv">±1.645</span></div>
-        <div class="info-row"><span class="il">Z, α=0.05</span><span class="iv">±1.960</span></div>
-        <div class="info-row"><span class="il">Z, α=0.01</span><span class="iv">±2.576</span></div>
-        <div class="info-row"><span class="il">t (df=10), α=0.05</span><span class="iv">±2.228</span></div>
-        <div class="info-row"><span class="il">t (df=20), α=0.05</span><span class="iv">±2.086</span></div>
-        <div class="info-row"><span class="il">t (df=30), α=0.05</span><span class="iv">±2.042</span></div>
-        <div class="info-row"><span class="il">t (df=∞), α=0.05</span><span class="iv">±1.960</span></div>
-      </div>
-    </div>
-  </div>
-</div>
 
 </div><!-- /container -->
 
